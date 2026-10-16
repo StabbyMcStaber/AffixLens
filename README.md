@@ -31,6 +31,17 @@ AffixLens shows the affix attached to each equipped item right on the character 
 
 This release includes **local collection tracking**, not the entirety of upstream AffixDex. Party comparison, previously seen player history, bag glow, and extended learned-state tooltip annotations are **not yet included**.
 
+## Screenshots
+
+### Character Window
+![Character Window](docs/screenshots/equipment-view.png)
+
+### Collection View
+![Collection View](docs/screenshots/collection-view.png)
+
+### Equipped Affixes Popup
+![Equipped Affixes Popup](docs/screenshots/equipment-popup.png)
+
 ## Credit and third-party notices
 
 Created by **Stan**, with assistance from **CarolJean**.
