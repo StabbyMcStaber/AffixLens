@@ -240,11 +240,14 @@ event:SetScript("OnEvent",function(self,e)
 end)
 event:SetScript("OnUpdate",function(self,delta)
     if not charButton and _G.AffixLensToggle and _G.CharacterFrame then
-        charButton=CreateFrame("Button","AffixLensCollectionToggle",CharacterFrame,"UIPanelButtonTemplate")
-        charButton:SetWidth(70);charButton:SetHeight(21)
+        charButton=CreateFrame("Button","AffixLensCollectionToggle",_G.AffixLensButtonAnchor or CharacterFrame,"UIPanelButtonTemplate")
+        charButton:SetWidth(69);charButton:SetHeight(19)
         charButton:SetText("Collection")
         charButton:SetPoint("LEFT",_G.AffixLensToggle,"RIGHT",3,0)
-        charButton:SetFrameLevel(CharacterFrame:GetFrameLevel()+12)
+        charButton:RegisterForDrag("LeftButton")
+        charButton:SetScript("OnDragStart",function() if _G.AffixLensStartAnchorDrag then _G.AffixLensStartAnchorDrag() end end)
+        charButton:SetScript("OnDragStop",function() if _G.AffixLensStopAnchorDrag then _G.AffixLensStopAnchorDrag() end end)
+        charButton:SetFrameLevel(_G.AffixLensToggle:GetFrameLevel())
         charButton:SetScript("OnClick",function() SlashCmdList.AFFIXLENSCOLLECTION("") end)
     end
     if frame and frame:IsShown() and (dirty or GetTime()-lastStamp>10) then render() end

@@ -33,6 +33,8 @@ scan:Hide()
 local widget
 local panel
 local toggleButton
+local buttonAnchor
+local anchorsUnlocked = false
 local initialized = false
 local elapsed = 0
 local refreshRequested = true
@@ -515,6 +517,49 @@ local function refreshPanelVisibility()
     if characterOpen then toggleButton:Show() else toggleButton:Hide() end
 end
 
+-- The two controls live in a single movable frame on the title bar.
+-- Offset units are relative to CharacterFrame and stored per character.
+local function anchorSettings()
+    AffixLensCharDB = AffixLensCharDB or {}
+    return AffixLensCharDB
+end
+local function applyButtonAnchor()
+    if not buttonAnchor or not CharacterFrame then return end
+    local prefs = anchorSettings()
+    local x = tonumber(prefs.buttonX) or 110
+    local y = tonumber(prefs.buttonY) or -12
+    buttonAnchor:ClearAllPoints()
+    buttonAnchor:SetPoint("TOPLEFT", CharacterFrame, "TOPLEFT", x, y)
+end
+local function stopAnchorDrag()
+    if not buttonAnchor or not anchorsUnlocked then return end
+    buttonAnchor:StopMovingOrSizing()
+    local left, top = buttonAnchor:GetLeft(), buttonAnchor:GetTop()
+    local charLeft, charTop = CharacterFrame:GetLeft(), CharacterFrame:GetTop()
+    if left and top and charLeft and charTop then
+        local prefs = anchorSettings()
+        prefs.buttonX = math.floor(left - charLeft + 0.5)
+        prefs.buttonY = math.floor(top - charTop + 0.5)
+    end
+    applyButtonAnchor()
+end
+_G.AffixLensStartAnchorDrag = function()
+    if buttonAnchor and anchorsUnlocked then buttonAnchor:StartMoving() end
+end
+_G.AffixLensStopAnchorDrag = stopAnchorDrag
+local function setAnchorsUnlocked(value)
+    anchorsUnlocked = value and true or false
+    if buttonAnchor then
+        if buttonAnchor.moveHint then
+            if anchorsUnlocked then buttonAnchor.moveHint:Show() else buttonAnchor.moveHint:Hide() end
+        end
+        if buttonAnchor.SetBackdropBorderColor then
+            if anchorsUnlocked then buttonAnchor:SetBackdropBorderColor(1, 0.75, 0.1, 1)
+            else buttonAnchor:SetBackdropBorderColor(0, 0, 0, 0) end
+        end
+    end
+end
+
 local function initialize()
     if initialized or not CharacterFrame then return false end
     -- Some clients lazily load the paper-doll portion of the Character UI.
@@ -528,14 +573,30 @@ local function initialize()
     for _, entry in ipairs(slots) do makeInline(entry) end
     createPanel()
 
-    toggleButton = CreateFrame("Button", "AffixLensToggle", CharacterFrame, "UIPanelButtonTemplate")
-    toggleButton:SetWidth(66)
-    toggleButton:SetHeight(21)
+    buttonAnchor = CreateFrame("Frame", "AffixLensButtonAnchor", CharacterFrame)
+    buttonAnchor:SetWidth(149)
+    buttonAnchor:SetHeight(19)
+    buttonAnchor:SetFrameLevel(CharacterFrame:GetFrameLevel() + 20)
+    buttonAnchor:SetMovable(true)
+    buttonAnchor:SetClampedToScreen(true)
+    buttonAnchor:EnableMouse(false)
+    buttonAnchor:SetBackdrop({ edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 10 })
+    buttonAnchor:SetBackdropBorderColor(0, 0, 0, 0)
+    applyButtonAnchor()
+    local moveHint = buttonAnchor:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    moveHint:SetPoint("TOP", buttonAnchor, "BOTTOM", 0, -2)
+    moveHint:SetText("Drag buttons to move")
+    moveHint:Hide()
+    buttonAnchor.moveHint = moveHint
+
+    toggleButton = CreateFrame("Button", "AffixLensToggle", buttonAnchor, "UIPanelButtonTemplate")
+    toggleButton:SetWidth(69)
+    toggleButton:SetHeight(19)
     toggleButton:SetText("Affix View")
-    -- Header position: beside the character name/level, not on the bottom
-    -- tabs (where 3.3.5a sometimes clips mouse input).
-    toggleButton:SetPoint("TOPLEFT", CharacterFrame, "TOPLEFT", 65, -32)
-    toggleButton:SetFrameLevel(CharacterFrame:GetFrameLevel() + 12)
+    toggleButton:SetPoint("LEFT", buttonAnchor, "LEFT", 0, 0)
+    toggleButton:RegisterForDrag("LeftButton")
+    toggleButton:SetScript("OnDragStart", _G.AffixLensStartAnchorDrag)
+    toggleButton:SetScript("OnDragStop", _G.AffixLensStopAnchorDrag)
     toggleButton:SetScript("OnClick", function()
         panelOpen = not panelOpen
         if panelOpen and SlashCmdList.AFFIXLENSCOLLECTION then SlashCmdList.AFFIXLENSCOLLECTION("hide") end
@@ -621,6 +682,23 @@ SlashCmdList.AFFIXLENS = function(message)
         elseif arg == "off" then db.inline = false
         else db.inline = not db.inline end
         chat("In-slot labels " .. (db.inline and "enabled" or "disabled") .. ".")
+    elseif cmd == "anchors" then
+        if arg == "unlock" then
+            setAnchorsUnlocked(true)
+            chat("Button anchors unlocked. Drag either button to reposition; /affixes anchors lock to finish.")
+        elseif arg == "lock" then
+            setAnchorsUnlocked(false)
+            chat("Button anchors locked.")
+        elseif arg == "reset" then
+            local prefs = anchorSettings()
+            prefs.buttonX, prefs.buttonY = nil, nil
+            applyButtonAnchor()
+            setAnchorsUnlocked(false)
+            chat("Button position reset to the character title bar.")
+        else
+            chat("Usage: /affixes anchors unlock | lock | reset")
+        end
+        return
     elseif cmd == "refresh" then
         chat("Rescanning equipped items.")
     elseif cmd == "debug" then
@@ -642,7 +720,7 @@ SlashCmdList.AFFIXLENS = function(message)
         panelOpen = not panelOpen
         if panelOpen and SlashCmdList.AFFIXLENSCOLLECTION then SlashCmdList.AFFIXLENSCOLLECTION("hide") end
     else
-        chat("Commands: /affixes [show|hide|toggle|refresh|inline on|inline off|debug head]")
+        chat("Commands: /affixes [show|hide|toggle|refresh|inline on|inline off|anchors unlock|anchors lock|anchors reset|debug head]")
         return
     end
     refreshRequested = true
