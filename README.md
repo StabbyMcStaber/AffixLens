@@ -1,6 +1,6 @@
 # AffixLens
 
-**Your equipped affixes, learned ranks, and collection — all in one place.**
+**Your equipped affixes, learned ranks, and collection  -  all in one place.**
 
 ![Release](https://img.shields.io/badge/release-v2.0.0-blue) ![WoW](https://img.shields.io/badge/WoW-3.3.5a-orange) ![Server](https://img.shields.io/badge/server-Project%20Ebonhold-purple)
 
@@ -12,7 +12,7 @@ AffixLens is an addon for **Project Ebonhold** (World of Warcraft 3.3.5a). It sh
 
 ### Your gear, at a glance
 
-Affix names sit beside your equipment slots — including the main-hand and ranged weapon affixes. Long names use readable abbreviations rather than losing the important part to `...`.
+Affix names sit beside your equipment slots  -  including the main-hand and ranged weapon affixes. Long names use readable abbreviations rather than losing the important part to `...`.
 
 ![AffixLens equipment labels in the character window](docs/screenshots/AffixLens_1.png)
 
@@ -45,7 +45,7 @@ Open a movable overview listing every equipped item and its current affix. Hover
 2. Extract it and place the **`AffixLens`** folder in:
 
    ```text
-   World of Warcraft\Interface\AddOns\AffixLens\
+   ebonhold\Interface\AddOns\AffixLens\
    ```
 
 3. Start the WoW 3.3.5a client. For an update to an existing addon, `/reload` is generally sufficient; a first install may require restarting the game.
