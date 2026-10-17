@@ -20,6 +20,13 @@ local catalog, learned = {}, {}
 local frame, scroller, list, searchBox, status, viewButton
 local lastStamp, dirty = 0, true
 local charButton
+local labelsToggle
+local function syncLabelsToggle()
+    if labelsToggle then
+        labelsToggle:SetChecked(not (AffixLensDB and AffixLensDB.inline == false))
+    end
+end
+_G.AffixLensSyncCollectionLabelsToggle = syncLabelsToggle
 local function charDB()
     AffixLensCharDB = AffixLensCharDB or {}
     AffixLensCharDB.learned = AffixLensCharDB.learned or {}
@@ -162,9 +169,13 @@ local function createUI()
     if frame then return end
     frame=CreateFrame("Frame","AffixLensCollectionWindow",UIParent)
     frame:SetWidth(555);frame:SetHeight(426);frame:SetPoint("CENTER");frame:SetFrameStrata("DIALOG")
-    frame:SetMovable(true);frame:EnableMouse(true);frame:RegisterForDrag("LeftButton")
-    frame:SetScript("OnDragStart",function(self) self:StartMoving() end)
-    frame:SetScript("OnDragStop",function(self) self:StopMovingOrSizing() end)
+    frame:SetMovable(true);frame:EnableMouse(true)
+    local dragBar=CreateFrame("Frame",nil,frame)
+    dragBar:SetPoint("TOPLEFT",frame,"TOPLEFT",12,-8)
+    dragBar:SetWidth(265);dragBar:SetHeight(33)
+    dragBar:EnableMouse(true);dragBar:RegisterForDrag("LeftButton")
+    dragBar:SetScript("OnDragStart",function() frame:StartMoving() end)
+    dragBar:SetScript("OnDragStop",function() frame:StopMovingOrSizing() end)
     frame:SetBackdrop({bgFile="Interface\\DialogFrame\\UI-DialogBox-Background",edgeFile="Interface\\DialogFrame\\UI-DialogBox-Border",edgeSize=28,insets={left=9,right=9,top=9,bottom=9}})
     frame:SetBackdropColor(0.05,0.04,0.08,0.94)
     local header=makeText(frame,17);header:SetPoint("TOPLEFT",24,-20);header:SetText("AffixLens - Collection")
@@ -172,10 +183,45 @@ local function createUI()
     local eq=CreateFrame("Button",nil,frame,"UIPanelButtonTemplate")
     eq:SetWidth(117);eq:SetHeight(24);eq:SetPoint("TOPRIGHT",close,"TOPLEFT",-9,-5)
     eq:SetText("Equipment")
+    eq:SetFrameLevel(frame:GetFrameLevel() + 15)
     eq:SetScript("OnClick",function()
         frame:Hide()
         if SlashCmdList.AFFIXLENS then SlashCmdList.AFFIXLENS("show") end
     end)
+    -- A second control for the same persisted setting used by Equipment View.
+    -- No separate saved variable: both windows always represent one preference.
+    labelsToggle=CreateFrame("CheckButton","AffixLensCollectionLabelsToggle",frame,"UICheckButtonTemplate")
+    labelsToggle:SetWidth(22);labelsToggle:SetHeight(22)
+    local toggleBackground=CreateFrame("Frame",nil,frame)
+    toggleBackground:SetWidth(205);toggleBackground:SetHeight(28)
+    toggleBackground:SetPoint("BOTTOMRIGHT",frame,"BOTTOMRIGHT",-18,8)
+    toggleBackground:SetBackdrop({bgFile="Interface\\ChatFrame\\ChatFrameBackground",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",edgeSize=10,insets={left=3,right=3,top=3,bottom=3}})
+    toggleBackground:SetBackdropColor(0.02,0.02,0.03,0.96)
+    toggleBackground:SetBackdropBorderColor(0.65,0.55,0.28,1)
+    toggleBackground:SetFrameLevel(frame:GetFrameLevel()+12)
+    labelsToggle:SetParent(toggleBackground)
+    labelsToggle:ClearAllPoints()
+    labelsToggle:SetPoint("RIGHT",toggleBackground,"RIGHT",-7,0)
+    labelsToggle:SetFrameLevel(toggleBackground:GetFrameLevel()+2)
+    local labelsCaption=makeText(toggleBackground,11)
+    labelsCaption:SetPoint("RIGHT",labelsToggle,"LEFT",-5,0)
+    labelsCaption:SetText("Show Equipment Labels")
+    labelsToggle:SetScript("OnClick",function(self)
+        if SlashCmdList.AFFIXLENS then
+            SlashCmdList.AFFIXLENS(self:GetChecked() and "inline on" or "inline off")
+        else
+            AffixLensDB=AffixLensDB or {}
+            AffixLensDB.inline=self:GetChecked() and true or false
+        end
+        syncLabelsToggle()
+    end)
+    labelsToggle:SetScript("OnEnter",function(self)
+        GameTooltip:SetOwner(self,"ANCHOR_RIGHT")
+        GameTooltip:SetText("Show affix labels on the character equipment slots")
+        GameTooltip:Show()
+    end)
+    labelsToggle:SetScript("OnLeave",function() GameTooltip:Hide() end)
+    syncLabelsToggle()
     local searchBackground = CreateFrame("Frame",nil,frame)
     searchBackground:SetWidth(232);searchBackground:SetHeight(29)
     searchBackground:SetPoint("TOPLEFT",frame,"TOPLEFT",24,-51)
@@ -203,10 +249,14 @@ local function createUI()
         local v=makeText(row,12);v:SetPoint("LEFT",row,"LEFT",190,0);v:SetWidth(295);row.ranks=v
         rows[i]=row
     end
-    status=makeText(frame,11);status:SetPoint("BOTTOMLEFT",24,21)
+    status=makeText(frame,11);status:SetPoint("BOTTOMLEFT",24,21);status:SetWidth(265)
     searchBox:SetScript("OnTextChanged",function() FauxScrollFrame_SetOffset(scroller,0);render() end)
-    frame:SetScript("OnShow",function() render() end)
+    frame:SetScript("OnShow",function() syncLabelsToggle();render() end)
     frame:Hide()
+end
+-- Explicit entry point for the equipment panel's Collection button.
+_G.AffixLensShowCollection = function()
+    if SlashCmdList.AFFIXLENSCOLLECTION then SlashCmdList.AFFIXLENSCOLLECTION("show") end
 end
 SLASH_AFFIXLENSCOLLECTION1="/affixcollection"
 SlashCmdList.AFFIXLENSCOLLECTION=function(msg)
@@ -249,6 +299,19 @@ event:SetScript("OnUpdate",function(self,delta)
         charButton:SetScript("OnDragStop",function() if _G.AffixLensStopAnchorDrag then _G.AffixLensStopAnchorDrag() end end)
         charButton:SetFrameLevel(_G.AffixLensToggle:GetFrameLevel())
         charButton:SetScript("OnClick",function() SlashCmdList.AFFIXLENSCOLLECTION("") end)
+        -- The title bar is shared by Character, Reputation, Skills and Currency.
+        -- Mirror the Affix View button's visibility instead of inheriting only
+        -- CharacterFrame visibility from the movable button anchor.
+        local function syncCharacterButton()
+            if _G.AffixLensToggle and _G.AffixLensToggle:IsShown() then
+                charButton:Show()
+            else
+                charButton:Hide()
+            end
+        end
+        _G.AffixLensToggle:HookScript("OnShow", syncCharacterButton)
+        _G.AffixLensToggle:HookScript("OnHide", syncCharacterButton)
+        syncCharacterButton()
     end
     if frame and frame:IsShown() and (dirty or GetTime()-lastStamp>10) then render() end
 end)

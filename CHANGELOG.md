@@ -1,4 +1,32 @@
-﻿# AffixLens v2.0.1
+﻿# AffixLens v2.0.2
+
+## New
+
+- Added a saved Show Equipment Labels control to both the Equipped Affixes and Collection windows.
+- Turn character-sheet affix text on or off without losing the detailed equipment view or collection tracker.
+- Both controls stay synchronized, and `/affixes inline on` and `/affixes inline off` remain supported.
+
+## Fixed
+
+- Repaired the Collection navigation button inside Equipped Affixes.
+- Restricted AffixLens character-header buttons to the Character tab; they no longer remain visible on Reputation, Skills, or Currency.
+- Improved the footer layout so Show Equipment Labels stays visible and clickable.
+
+## Installation
+
+1. Download the attached `AffixLens-v2.0.2.zip` file.
+2. Extract `AffixLens` into `ebonhold\Interface\AddOns\`.
+3. Restart the client, or type `/reload` when updating an already installed addon.
+
+## Notes
+
+Compatible with Project Ebonhold WoW 3.3.5a. Existing affix collection data and button positions are retained.
+
+Thanks to Noturpalguy for the original AffixDex work. MIT attribution remains in `AffixLens/THIRD_PARTY_LICENSES.txt`.
+
+---
+
+# AffixLens v2.0.1
 
 ## What's new
 - Move the Affix View and Collection buttons together as one draggable anchor group.
@@ -32,4 +60,5 @@ This update builds on v2.0.0. The affix display, collection tracker, and existin
 - Improved equipment-slot positioning and UI layout through community testing.
 
 This is the first public release of the combined AffixLens addon.
+
 

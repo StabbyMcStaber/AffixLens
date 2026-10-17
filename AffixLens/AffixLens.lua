@@ -407,7 +407,7 @@ local function createPanel()
     -- character sheet. It remains hidden until "Affix View" is clicked.
     panel = CreateFrame("Frame", "AffixLensEquipmentPanel", UIParent)
     panel:SetWidth(465)
-    panel:SetHeight(468)
+    panel:SetHeight(503)
     panel:SetMovable(true)
     panel:SetClampedToScreen(true)
     panel:EnableMouse(true)
@@ -431,7 +431,7 @@ local function createPanel()
     -- fully usable. The last dragged location is restored next time.
     local header = CreateFrame("Frame", nil, panel)
     header:SetPoint("TOPLEFT", panel, "TOPLEFT", 5, -4)
-    header:SetWidth(423)
+    header:SetWidth(250)
     header:SetHeight(42)
     header:EnableMouse(true)
     header:RegisterForDrag("LeftButton")
@@ -460,8 +460,16 @@ local function createPanel()
     collectionButton:SetHeight(22)
     collectionButton:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -43, -10)
     collectionButton:SetText("Collection")
+    collectionButton:SetFrameLevel(panel:GetFrameLevel() + 15)
     collectionButton:SetScript("OnClick", function()
-        if SlashCmdList.AFFIXLENSCOLLECTION then SlashCmdList.AFFIXLENSCOLLECTION("show") end
+        -- Hide the source first, then open the target explicitly.
+        panelOpen = false
+        panel:Hide()
+        if _G.AffixLensShowCollection then
+            _G.AffixLensShowCollection()
+        elseif SlashCmdList.AFFIXLENSCOLLECTION then
+            SlashCmdList.AFFIXLENSCOLLECTION("show")
+        end
     end)
 
     local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
@@ -471,8 +479,45 @@ local function createPanel()
     help:SetPoint("TOPLEFT", panel, "TOPLEFT", 14, -33)
     help:SetText("Hover a row for the complete equipment tooltip")
 
+    -- Optional character-sheet affix labels. The setting is saved across reloads.
+    local labelsToggle = CreateFrame("CheckButton", "AffixLensInlineLabelsToggle", panel, "UICheckButtonTemplate")
+    labelsToggle:SetWidth(23)
+    labelsToggle:SetHeight(23)
+    -- Dedicated footer beneath the last equipment row; don't overlap row 19.
+    local toggleBackground = CreateFrame("Frame", nil, panel)
+    toggleBackground:SetWidth(205); toggleBackground:SetHeight(28)
+    toggleBackground:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -8, 7)
+    toggleBackground:SetBackdrop({ bgFile = "Interface\\ChatFrame\\ChatFrameBackground", edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 10, insets = {left=3,right=3,top=3,bottom=3} })
+    toggleBackground:SetBackdropColor(0.02, 0.02, 0.03, 0.96)
+    toggleBackground:SetBackdropBorderColor(0.65, 0.55, 0.28, 1)
+    toggleBackground:SetFrameLevel(panel:GetFrameLevel() + 8)
+    labelsToggle:SetParent(toggleBackground)
+    labelsToggle:ClearAllPoints()
+    labelsToggle:SetPoint("RIGHT", toggleBackground, "RIGHT", -7, 0)
+    labelsToggle:SetFrameLevel(toggleBackground:GetFrameLevel() + 2)
+    labelsToggle:SetChecked(db.inline)
+    local labelsCaption = toggleBackground:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    labelsCaption:SetPoint("RIGHT", labelsToggle, "LEFT", -4, 0)
+    labelsCaption:SetText("Show Equipment Labels")
+    labelsToggle:SetScript("OnClick", function(self)
+        db.inline = self:GetChecked() and true or false
+        refreshRequested = true
+        updateWidgets()
+        if _G.AffixLensSyncCollectionLabelsToggle then _G.AffixLensSyncCollectionLabelsToggle() end
+    end)
+    labelsToggle:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText("Show affix text next to equipped items")
+        GameTooltip:AddLine("Collection and equipment overview remain available.", 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    labelsToggle:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    panel.labelsToggle = labelsToggle
+
     panel.summary = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    panel.summary:SetPoint("BOTTOMLEFT", panel, "BOTTOMLEFT", 15, 12)
+    panel.summary:SetPoint("BOTTOMLEFT", panel, "BOTTOMLEFT", 15, 15)
+    panel.summary:SetWidth(235)
+    panel.summary:SetJustifyH("LEFT")
 
     for index, entry in ipairs(slots) do
         entry.index = index
@@ -681,6 +726,10 @@ SlashCmdList.AFFIXLENS = function(message)
         if arg == "on" then db.inline = true
         elseif arg == "off" then db.inline = false
         else db.inline = not db.inline end
+        if panel and panel.labelsToggle then panel.labelsToggle:SetChecked(db.inline) end
+        if _G.AffixLensSyncCollectionLabelsToggle then _G.AffixLensSyncCollectionLabelsToggle() end
+        refreshRequested = true
+        updateWidgets()
         chat("In-slot labels " .. (db.inline and "enabled" or "disabled") .. ".")
     elseif cmd == "anchors" then
         if arg == "unlock" then

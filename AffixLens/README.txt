@@ -18,3 +18,8 @@ Button placement: by default, Affix View and Collection appear in the character 
 Positions are saved per character.
 
 UI polish: Both header buttons now use identical sizes and the same movable title-bar anchor.
+
+Affix View: Use the Show labels checkbox to hide or show character-sheet affix text.
+The setting persists across sessions. /affixes inline on|off is also supported.
+
+Collection now also includes Show Equipment Labels. Both checkboxes share the same setting.

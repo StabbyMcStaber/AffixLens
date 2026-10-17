@@ -2,7 +2,7 @@
 ## Title: AffixLens
 ## Notes: Shows equipped Ebonhold affixes on the character sheet and in an optional movable window.
 ## Author: Stan (with CarolJean)
-## Version: 2.0.1
+## Version: 2.0.2
 ## SavedVariables: AffixLensDB
 ## SavedVariablesPerCharacter: AffixLensCharDB
 
