@@ -1,3 +1,19 @@
+# AffixLens v2.1.3 (2026-10-21)
+
+## Fixed
+- Large, high-contrast gold unlearned-affix badge on inventory item icons.
+- Bag/slot matching for ElvUI and Blizzard bags, with generic metadata fallback for other UI addons.
+- Markers follow bag item movement, and character sheet buttons follow repositioned CharacterFrame.
+- Detect ranked affixes correctly when cached item names include the suffix.
+- Add /affixbagtest and /affixbagframe diagnostics.
+
+## Validated in-game
+- Armor Rend VI correctly detected as unlearned and visibly marked in ElvUI.
+- Character-sheet buttons follow the repositioned character frame.
+- /affixbagtest correctly reports bag 3 slot 3; 49 items scanned, 1 unlearned.
+
+---
+
 # AffixLens v2.1.2 (2026-10-21)
 
 ## Fixed
