@@ -13,8 +13,8 @@ local function split(s)
     if base then return base,rank end
     return s,nil
 end
-local aliases = { ["inner light"]="Spirit Surge", ["keen strike"]="Keen Strikes", ["precision"]="Cold", ["swift footwork"]="Feral Grace", ["enduring flesh"]="Ironhide" }
-local fallback = {"Block","Arcane Mind","Armor Rend","Bulwark","Cold","Feral Grace","Fortified by Pain","Frost Breath","Frozen Pulse","Infinite Star","Iron Will","Ironhide","Keen Strikes","Living Tide","Mender's Surge","Overwhelming Force","Pet Power","Quick Instincts","Relentless Crits","Shield Block","Spell Mastery","Spirit Surge","Stalwart","Temporal Flux","Thick Hide","Wellspring"}
+local aliases = { ["inner light"]="Spirit Surge", ["keen strike"]="Keen Strikes", ["precision"]="Cold", ["swift footwork"]="Feral Grace", ["enduring flesh"]="Ironhide", ["block"]="Shield Block" }
+local fallback = {"Arcane Mind","Armor Rend","Bulwark","Cold","Feral Grace","Fortified by Pain","Frost Breath","Frozen Pulse","Infinite Star","Iron Will","Ironhide","Keen Strikes","Living Tide","Mender's Surge","Overwhelming Force","Pet Power","Quick Instincts","Relentless Crits","Shield Block","Spell Mastery","Spirit Surge","Stalwart","Temporal Flux","Thick Hide","Wellspring"}
 local weaponFallback = {"Affliction","Azzinoth","Bladestorm","Bloodlust","Clarity","Concussion","Decay","Devastation","Dissolution","Execution","Ferocity","Fire Blast","Flame Wrath","Flurry","Fortification","Frailty","Frost Arrow","Fury","Glaciation","Hemorrhage","Incineration","Judgement","Julie's Blessing","Keeper's Sting","Maiming","Permafrost","Pyromancy","Rending","Resurgence","Shackling","Shahram","Speed","Sulfuras","Thunderfury","Twin Shot","Undead","Val'anyr","Vampirism","Venom","Vulnerability","Wilds"}
 local catalog, learned = {}, {}
 local frame, scroller, list, searchBox, status, viewButton
@@ -39,6 +39,7 @@ local function add(name,weapon,icon)
     catalog[key]=catalog[key] or {name=base,weapon=weapon,icon=icon}
     if weapon then catalog[key].weapon=true end
     if icon then catalog[key].icon=icon end
+    if key=="shield block" then catalog[key].name="Block" end
     return key
 end
 local function record(name)
@@ -74,7 +75,7 @@ local function rescan()
             end
         end
         -- Retain locally known families omitted by a partial server response.
-        add("Block",false)
+        add("Shield Block",false)
         source="Ebonhold server catalog"
     else
         -- Spellbook fallback: only mark spell names matching catalog entries.
@@ -95,31 +96,32 @@ local function rescan()
     dirty=false
     return source
 end
--- Public read-only status query shared with inventory inspection.
--- nil means the catalog cannot identify this affix; never guess its status.
+-- Old saved data may contain either naming convention. Both are the same family.
+local function learnedRanks(key)
+    if key~="shield block" then return learned[key] end
+    local official=learned["shield block"]
+    local legacy=learned.block
+    if not legacy then return official end
+    if not official then return legacy end
+    local combined={}
+    for rank,value in pairs(official) do if value then combined[rank]=true end end
+    for rank,value in pairs(legacy) do if value then combined[rank]=true end end
+    return combined
+end
+-- Resolve the item-tooltip name "Block" against the server's "Shield Block".
 _G.AffixLensAffixLearned = function(name)
-    if not name or name == "" then return nil end
-    if dirty or GetTime()-lastStamp > 10 then rescan() end
-    local base, rank = split(name)
-    base = base:gsub("^[Oo][Ff]%s+", "")
-    base = aliases[base:lower()] or base
-    local key = base:lower()
-    local family = catalog[key]
+    if not name or name=="" then return nil end
+    if dirty or GetTime()-lastStamp>10 then rescan() end
+    local base,rank=split(name)
+    base=base:gsub("^[Oo][Ff]%s+","")
+    base=aliases[base:lower()] or base
+    local key=base:lower()
+    local family=catalog[key]
     if not family then return nil end
-    local id = family.weapon and "weapon" or rank
+    local id=family.weapon and "weapon" or rank
     if not id then return nil end
     local known=learnedRanks(key)
     return (known and known[id]) and true or false
-end
--- The Ebonhold runtime has historically used "Shield Block" for the
--- collection family called "Block". Prefer exact Block data when provided,
--- otherwise reuse the older family\'s learned ranks rather than declaring
--- every Block rank missing.
-local function learnedRanks(key)
-    if key=="block" and not (learned.block and next(learned.block)) then
-        return learned["shield block"]
-    end
-    return learned[key]
 end
 local function makeText(parent,size)
     local t=parent:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
@@ -159,7 +161,7 @@ local function render()
     local query=clean(searchBox:GetText() or ""):lower()
     local armor, weapons = {}, {}
     for key,a in pairs(catalog) do
-        if query=="" or key:find(query,1,true) then
+        if query=="" or key:find(query,1,true) or a.name:lower():find(query,1,true) then
             if a.weapon then weapons[#weapons+1]=a else armor[#armor+1]=a end
         end
     end
