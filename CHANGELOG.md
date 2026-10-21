@@ -1,3 +1,18 @@
+# AffixLens v2.1.1 (2026-10-20)
+
+## Fixed
+- Restored the original **Shield Block** name in Collection and its original learned-rank lookup, resolving the incorrect Block display introduced in v2.1.0.
+- Retained the item-tooltip alias from **Block** to **Shield Block**, without renaming the Collection family.
+
+## Unchanged from v2.1.0
+- Resizable Collection window with saved size.
+- Inventory alerts and yellow bag-slot markers for detectable unlearned affixes.
+
+## Install
+Extract the `AffixLens` folder into `Interface\\AddOns\\`, overwrite the existing files, and type `/reload`.
+
+---
+
 # AffixLens v2.1.0 (2026-10-20)
 
 ## New
