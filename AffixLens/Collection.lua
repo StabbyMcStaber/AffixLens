@@ -108,7 +108,18 @@ _G.AffixLensAffixLearned = function(name)
     if not family then return nil end
     local id = family.weapon and "weapon" or rank
     if not id then return nil end
-    return (learned[key] and learned[key][id]) and true or false
+    local known=learnedRanks(key)
+    return (known and known[id]) and true or false
+end
+-- The Ebonhold runtime has historically used "Shield Block" for the
+-- collection family called "Block". Prefer exact Block data when provided,
+-- otherwise reuse the older family\'s learned ranks rather than declaring
+-- every Block rank missing.
+local function learnedRanks(key)
+    if key=="block" and not (learned.block and next(learned.block)) then
+        return learned["shield block"]
+    end
+    return learned[key]
 end
 local function makeText(parent,size)
     local t=parent:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
@@ -185,13 +196,14 @@ local function render()
                 row.icon:SetTexture(a.icon or "Interface\\Icons\\INV_Misc_QuestionMark")
                 local key=a.name:lower()
                 local parts={}
+                local known=learnedRanks(key)
                 if a.weapon then
-                    parts[1]=learned[key] and learned[key].weapon and "|cff40ef80LEARNED|r" or "|cff888888Not learned|r"
+                    parts[1]=known and known.weapon and "|cff40ef80LEARNED|r" or "|cff888888Not learned|r"
                 else
                     local cap = rankCap[key] or fallbackRankCaps[key] or 6
                     for ri=1,cap do
                         local rank=ranks[ri]
-                        parts[#parts+1]=(learned[key] and learned[key][rank]) and ("|cff40ef80"..rank.."|r") or ("|cff777777"..rank.."|r")
+                        parts[#parts+1]=(known and known[rank]) and ("|cff40ef80"..rank.."|r") or ("|cff777777"..rank.."|r")
                     end
                 end
                 row.ranks:SetText(table.concat(parts,"  "))
