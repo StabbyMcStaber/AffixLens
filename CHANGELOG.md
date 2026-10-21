@@ -1,4 +1,25 @@
-﻿# AffixLens v2.0.2
+# AffixLens v2.1.0 (2026-10-20)
+
+## New
+- Resizable Collection window with a bottom-right grip, responsive scrolling and per-character saved dimensions.
+- Inventory discovery notifications for newly acquired items bearing recognizable, unlearned affixes.
+- Yellow exclamation markers on bag slots containing unlearned affixes.
+- Toggle discovery chat and sound alerts with `/affixdiscover on` or `/affixdiscover off` (bag markers remain enabled).
+
+## Fixed
+- Recognize **Block** on item tooltips as the same learned-affix family as **Shield Block** in Ebonhold's records.
+- Show one Block family in Collection and carry forward saved learned ranks under either naming convention.
+- Keep server entries and fallback families visible when a partial catalog response arrives.
+
+## Install
+Extract the `AffixLens` folder from the release ZIP to `Interface\\AddOns\\`, replacing your existing addon files, then run `/reload`.
+
+## Testing note
+Changes were inspected in source and Block mapping was user-tested in-game. Inventory detection and resize behavior should also be confirmed in a live Project Ebonhold client.
+
+---
+
+# AffixLens v2.0.2
 
 ## New
 
