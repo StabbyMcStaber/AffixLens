@@ -261,6 +261,22 @@ local function readEquipment(entry)
     }
 end
 
+-- An affix from the weapon catalog must occur on an actual weapon.
+-- Checking suffixes on every bag item mistakes Potion of Speed for Speed.
+-- Use WoW's actual item class rather than name/substrings; ranged weapons
+-- and wands are included in the Weapon class in 3.3.5a.
+local function isWeaponItem(itemID)
+    if not itemID then return false end
+    local _, _, _, _, _, _, _, _, equipLoc, _, _, classID = GetItemInfo(itemID)
+    -- GetItemInfo's 12th return is classID on 3.3.5a clients.
+    if classID ~= nil then return classID == 2 end
+    -- Some 3.3.5a forks expose only the localized class string.
+    return equipLoc == "INVTYPE_WEAPON" or equipLoc == "INVTYPE_2HWEAPON"
+        or equipLoc == "INVTYPE_WEAPONMAINHAND" or equipLoc == "INVTYPE_WEAPONOFFHAND"
+        or equipLoc == "INVTYPE_RANGED" or equipLoc == "INVTYPE_RANGEDRIGHT"
+        or equipLoc == "INVTYPE_THROWN"
+end
+
 -- Inspect the real bag-slot tooltip; an itemID-only lookup loses engravings.
 _G.AffixLensInspectBagItem = function(bag, slot)
     local link=GetContainerItemLink(bag,slot)
@@ -282,7 +298,10 @@ _G.AffixLensInspectBagItem = function(bag, slot)
         return clean(name):gsub("^[Oo][Ff]%s+","").." "..rank
     end
     -- Known unranked weapon suffixes, even when no proc tooltip is present.
-    local weapon=weaponSuffix(title) or (effect and resolveWeaponProc(effect))
+    if not isWeaponItem(itemID) then return nil end
+    -- Require an actual changed tooltip title for an explicit suffix.
+    -- Unmodified base items can still be identified by their @affix@ proc.
+    local weapon=(title ~= base and weaponSuffix(title)) or (effect and resolveWeaponProc(effect))
     return weapon
 end
 
