@@ -1,3 +1,19 @@
+# AffixLens v2.1.2 (2026-10-21)
+
+## Fixed
+- Prevent unlearned weapon-affix notifications on consumables and other non-weapon items, including **Potion of Speed**.
+- Gate weapon-affix discovery on actual weapon classification and tooltip evidence instead of incidental name matches.
+- Add 194 candidate weapon source mappings across 41 affix families from the Ebonhold weapon-affix spreadsheet, including **Speed** on Sprinter's Sword (18410).
+
+## Testing
+- Requires in-game validation on WoW 3.3.5a. Test Potion of Speed (no alert), a mapped affixed weapon (correct alert if unlearned), and a normal copy of that weapon (no alert).
+- Source mapping is a discovery fallback when an @affix@ tooltip effect exists; item ID alone must not trigger an alert.
+
+## Install
+- Extract the `AffixLens` directory into `Interface\\AddOns\\` and enter `/reload`.
+
+---
+
 # AffixLens v2.1.1 (2026-10-20)
 
 ## Fixed
