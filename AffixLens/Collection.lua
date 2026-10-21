@@ -59,7 +59,8 @@ local function rescan()
     local server=svc and svc.learnedAffixes
     local source="Fallback catalog"
     if type(server)=="table" and #server>0 then
-        catalog={}
+        -- Merge authoritative server entries into the fallback catalog so
+        -- unlearned families absent from a learned-only response remain visible.
         for _,a in ipairs(server) do
             if type(a)=="table" and type(a.name)=="string" then
                 local base, rank = split(a.name)
