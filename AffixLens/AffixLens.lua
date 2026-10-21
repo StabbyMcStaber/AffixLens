@@ -261,6 +261,31 @@ local function readEquipment(entry)
     }
 end
 
+-- Inspect the real bag-slot tooltip; an itemID-only lookup loses engravings.
+_G.AffixLensInspectBagItem = function(bag, slot)
+    local link=GetContainerItemLink(bag,slot)
+    if not link then return nil end
+    local itemID=tonumber(link:match("item:(%d+)"))
+    local base=itemID and GetItemInfo(itemID)
+    if not base then return nil end
+    base=clean(base)
+    scan:SetOwner(UIParent,"ANCHOR_NONE")
+    scan:ClearLines()
+    scan:SetBagItem(bag,slot)
+    local fs=_G.AffixLensScanTooltipTextLeft1
+    local title=fs and clean(fs:GetText()) or ""
+    local effect=effectText()
+    scan:Hide()
+    if title=="" then return nil end
+    local name,rank=rankedAffix(title,base)
+    if name then
+        return clean(name):gsub("^[Oo][Ff]%s+","").." "..rank
+    end
+    -- Known unranked weapon suffixes, even when no proc tooltip is present.
+    local weapon=weaponSuffix(title) or (effect and resolveWeaponProc(effect))
+    return weapon
+end
+
 local function colors(data, duplicate)
     if duplicate then return 1.0, 0.56, 0.23 end
     if data.status == "affix" then return 0.80, 0.56, 1.0 end
