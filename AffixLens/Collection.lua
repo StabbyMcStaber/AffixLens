@@ -39,7 +39,6 @@ local function add(name,weapon,icon)
     catalog[key]=catalog[key] or {name=base,weapon=weapon,icon=icon}
     if weapon then catalog[key].weapon=true end
     if icon then catalog[key].icon=icon end
-    if key=="shield block" then catalog[key].name="Block" end
     return key
 end
 local function record(name)
@@ -96,18 +95,6 @@ local function rescan()
     dirty=false
     return source
 end
--- Old saved data may contain either naming convention. Both are the same family.
-local function learnedRanks(key)
-    if key~="shield block" then return learned[key] end
-    local official=learned["shield block"]
-    local legacy=learned.block
-    if not legacy then return official end
-    if not official then return legacy end
-    local combined={}
-    for rank,value in pairs(official) do if value then combined[rank]=true end end
-    for rank,value in pairs(legacy) do if value then combined[rank]=true end end
-    return combined
-end
 -- Resolve the item-tooltip name "Block" against the server's "Shield Block".
 _G.AffixLensAffixLearned = function(name)
     if not name or name=="" then return nil end
@@ -120,7 +107,7 @@ _G.AffixLensAffixLearned = function(name)
     if not family then return nil end
     local id=family.weapon and "weapon" or rank
     if not id then return nil end
-    local known=learnedRanks(key)
+    local known=learned[key]
     return (known and known[id]) and true or false
 end
 local function makeText(parent,size)
@@ -198,7 +185,7 @@ local function render()
                 row.icon:SetTexture(a.icon or "Interface\\Icons\\INV_Misc_QuestionMark")
                 local key=a.name:lower()
                 local parts={}
-                local known=learnedRanks(key)
+                local known=learned[key]
                 if a.weapon then
                     parts[1]=known and known.weapon and "|cff40ef80LEARNED|r" or "|cff888888Not learned|r"
                 else
