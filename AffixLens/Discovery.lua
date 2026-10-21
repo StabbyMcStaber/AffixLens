@@ -44,7 +44,7 @@ local function inspect()
 end
 local function updateBadges()
     -- The container UI can recycle frames between different bags.
-    for index=1,NUM_CONTAINER_FRAMES or 13 do
+    for index=1,(NUM_CONTAINER_FRAMES or 13) do
         local container=_G["ContainerFrame"..index]
         if container then
             local bag=container:GetID()
