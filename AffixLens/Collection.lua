@@ -13,8 +13,8 @@ local function split(s)
     if base then return base,rank end
     return s,nil
 end
-local aliases = { ["inner light"]="Spirit Surge", ["keen strike"]="Keen Strikes", ["block"]="Shield Block", ["precision"]="Cold", ["swift footwork"]="Feral Grace", ["enduring flesh"]="Ironhide" }
-local fallback = {"Arcane Mind","Armor Rend","Bulwark","Cold","Feral Grace","Fortified by Pain","Frost Breath","Frozen Pulse","Infinite Star","Iron Will","Ironhide","Keen Strikes","Living Tide","Mender's Surge","Overwhelming Force","Pet Power","Quick Instincts","Relentless Crits","Shield Block","Spell Mastery","Spirit Surge","Stalwart","Temporal Flux","Thick Hide","Wellspring"}
+local aliases = { ["inner light"]="Spirit Surge", ["keen strike"]="Keen Strikes", ["precision"]="Cold", ["swift footwork"]="Feral Grace", ["enduring flesh"]="Ironhide" }
+local fallback = {"Block","Arcane Mind","Armor Rend","Bulwark","Cold","Feral Grace","Fortified by Pain","Frost Breath","Frozen Pulse","Infinite Star","Iron Will","Ironhide","Keen Strikes","Living Tide","Mender's Surge","Overwhelming Force","Pet Power","Quick Instincts","Relentless Crits","Shield Block","Spell Mastery","Spirit Surge","Stalwart","Temporal Flux","Thick Hide","Wellspring"}
 local weaponFallback = {"Affliction","Azzinoth","Bladestorm","Bloodlust","Clarity","Concussion","Decay","Devastation","Dissolution","Execution","Ferocity","Fire Blast","Flame Wrath","Flurry","Fortification","Frailty","Frost Arrow","Fury","Glaciation","Hemorrhage","Incineration","Judgement","Julie's Blessing","Keeper's Sting","Maiming","Permafrost","Pyromancy","Rending","Resurgence","Shackling","Shahram","Speed","Sulfuras","Thunderfury","Twin Shot","Undead","Val'anyr","Vampirism","Venom","Vulnerability","Wilds"}
 local catalog, learned = {}, {}
 local frame, scroller, list, searchBox, status, viewButton
@@ -72,6 +72,8 @@ local function rescan()
                 if a.learned then record(a.name) end
             end
         end
+        -- Retain locally known families omitted by a partial server response.
+        add("Block",false)
         source="Ebonhold server catalog"
     else
         -- Spellbook fallback: only mark spell names matching catalog entries.
@@ -92,6 +94,21 @@ local function rescan()
     dirty=false
     return source
 end
+-- Public read-only status query shared with inventory inspection.
+-- nil means the catalog cannot identify this affix; never guess its status.
+_G.AffixLensAffixLearned = function(name)
+    if not name or name == "" then return nil end
+    if dirty or GetTime()-lastStamp > 10 then rescan() end
+    local base, rank = split(name)
+    base = base:gsub("^[Oo][Ff]%s+", "")
+    base = aliases[base:lower()] or base
+    local key = base:lower()
+    local family = catalog[key]
+    if not family then return nil end
+    local id = family.weapon and "weapon" or rank
+    if not id then return nil end
+    return (learned[key] and learned[key][id]) and true or false
+end
 local function makeText(parent,size)
     local t=parent:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
     t:SetFont(STANDARD_TEXT_FONT,size or 12,"OUTLINE")
@@ -99,6 +116,31 @@ local function makeText(parent,size)
     return t
 end
 local rows={}
+local ROW_HEIGHT = 23
+local MIN_WIDTH, MIN_HEIGHT = 555, 350
+local MAX_WIDTH, MAX_HEIGHT = 1050, 780
+local function collectionPrefs()
+    local prefs=charDB()
+    prefs.collection=prefs.collection or {}
+    return prefs.collection
+end
+local function layout()
+    if not frame then return end
+    local w,h=frame:GetWidth(),frame:GetHeight()
+    local visible=math.min(#rows,math.max(1,math.floor((h-130)/ROW_HEIGHT)))
+    scroller:SetWidth(w-52)
+    scroller:SetHeight(visible*ROW_HEIGHT)
+    local nameWidth=math.max(155,math.min(315,math.floor((w-90)*0.38)))
+    for i,row in ipairs(rows) do
+        row:SetWidth(w-58)
+        row.name:SetWidth(nameWidth)
+        row.ranks:ClearAllPoints()
+        row.ranks:SetPoint("LEFT",row,"LEFT",nameWidth+35,0)
+        row.ranks:SetWidth(math.max(80,w-nameWidth-100))
+        if i<=visible then row:Show() else row:Hide() end
+    end
+    frame.visibleRows=visible
+end
 local function render()
     if not frame or not frame:IsShown() then return end
     local source=rescan()
@@ -124,21 +166,20 @@ local function render()
     status:SetText((#armor+#weapons).." families ("..#armor.." armor / "..#weapons.." weapon) | "..count.." learned | "..source)
     for _,row in ipairs(rows) do row:Hide() end
     local offset=FauxScrollFrame_GetOffset(scroller)
-    FauxScrollFrame_Update(scroller,#sorted,#rows,23)
+    FauxScrollFrame_Update(scroller,#sorted,frame.visibleRows or 12,ROW_HEIGHT)
     for i,row in ipairs(rows) do
-        local a=sorted[i+offset]
+        local a=i<=(frame.visibleRows or 12) and sorted[i+offset] or nil
         if a then
             row:Show()
             if a.section then
                 row.icon:Hide()
                 row.name:SetText("|cffffd100"..a.section.." ("..a.size..")|r")
-                row.name:SetWidth(460)
+                row.name:SetWidth(frame:GetWidth()-95)
                 row.ranks:SetText("")
                 row:SetScript("OnEnter",nil)
                 row:SetScript("OnLeave",nil)
             else
                 row.icon:Show()
-                row.name:SetWidth(155)
                 row.name:SetText(a.name)
                 row.icon:SetTexture(a.icon or "Interface\\Icons\\INV_Misc_QuestionMark")
                 local key=a.name:lower()
@@ -168,7 +209,12 @@ end
 local function createUI()
     if frame then return end
     frame=CreateFrame("Frame","AffixLensCollectionWindow",UIParent)
-    frame:SetWidth(555);frame:SetHeight(426);frame:SetPoint("CENTER");frame:SetFrameStrata("DIALOG")
+    local prefs=collectionPrefs()
+    frame:SetWidth(math.max(MIN_WIDTH,math.min(MAX_WIDTH,tonumber(prefs.width) or 555)))
+    frame:SetHeight(math.max(MIN_HEIGHT,math.min(MAX_HEIGHT,tonumber(prefs.height) or 426)))
+    frame:SetPoint("CENTER");frame:SetFrameStrata("DIALOG")
+    frame:SetResizable(true);frame:SetMinResize(MIN_WIDTH,MIN_HEIGHT);frame:SetMaxResize(MAX_WIDTH,MAX_HEIGHT)
+    frame:SetClampedToScreen(true)
     frame:SetMovable(true);frame:EnableMouse(true)
     local dragBar=CreateFrame("Frame",nil,frame)
     dragBar:SetPoint("TOPLEFT",frame,"TOPLEFT",12,-8)
@@ -238,10 +284,10 @@ local function createUI()
     searchBox:SetScript("OnEscapePressed",function(self) self:ClearFocus() end)
     searchBox:SetScript("OnEnterPressed",function(self) self:ClearFocus() end)
     local scroll=CreateFrame("ScrollFrame","AffixLensCollectionScroll",frame,"FauxScrollFrameTemplate")
-    scroll:SetPoint("TOPLEFT",frame,"TOPLEFT",15,-93);scroll:SetWidth(503);scroll:SetHeight(294)
+    scroll:SetPoint("TOPLEFT",frame,"TOPLEFT",15,-93);scroll:SetWidth(503);scroll:SetHeight(276)
     scroller=scroll
     scroll:SetScript("OnVerticalScroll",function(self,delta) FauxScrollFrame_OnVerticalScroll(self,delta,23,render) end)
-    for i=1,12 do
+    for i=1,28 do
         local row=CreateFrame("Button",nil,frame)
         row:SetHeight(22);row:SetWidth(495);row:SetPoint("TOPLEFT",frame,"TOPLEFT",29,-98-(i-1)*23)
         local icon=row:CreateTexture(nil,"ARTWORK");icon:SetWidth(19);icon:SetHeight(19);icon:SetPoint("LEFT",0,0);row.icon=icon
@@ -251,7 +297,21 @@ local function createUI()
     end
     status=makeText(frame,11);status:SetPoint("BOTTOMLEFT",24,21);status:SetWidth(265)
     searchBox:SetScript("OnTextChanged",function() FauxScrollFrame_SetOffset(scroller,0);render() end)
-    frame:SetScript("OnShow",function() syncLabelsToggle();render() end)
+    local grip=CreateFrame("Button",nil,frame)
+    grip:SetWidth(19);grip:SetHeight(19);grip:SetPoint("BOTTOMRIGHT",frame,"BOTTOMRIGHT",-8,8)
+    grip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+    grip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+    grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+    grip:EnableMouse(true);grip:RegisterForDrag("LeftButton")
+    grip:SetScript("OnDragStart",function() frame:StartSizing("BOTTOMRIGHT") end)
+    grip:SetScript("OnDragStop",function()
+        frame:StopMovingOrSizing()
+        local p=collectionPrefs();p.width=math.floor(frame:GetWidth()+0.5);p.height=math.floor(frame:GetHeight()+0.5)
+        layout();render()
+    end)
+    frame:SetScript("OnSizeChanged",function() layout();render() end)
+    layout()
+    frame:SetScript("OnShow",function() syncLabelsToggle();layout();render() end)
     frame:Hide()
 end
 -- Explicit entry point for the equipment panel's Collection button.
