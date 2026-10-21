@@ -83,9 +83,26 @@ end
 -- "Sanctified Bloodmage Hood of Inner Light II".
 -- Standard WoW randomized suffixes ("of the Bear") don't carry a rank.
 local function rankedAffix(title, base)
-    if not base or base == "" or title == base then return nil end
+    -- The client's cached GetItemInfo name sometimes *already includes*
+    -- the engraved suffix. Detect explicit, catalogued ranked suffixes first.
     local rank = title:match(" ([IVXLCDM]+)$")
     if not rank then return nil end
+    local knownRanked = {
+        "Arcane Mind", "Armor Rend", "Bulwark", "Cold", "Feral Grace",
+        "Fortified by Pain", "Frost Breath", "Frozen Pulse", "Infinite Star",
+        "Iron Will", "Ironhide", "Keen Strikes", "Living Tide",
+        "Mender's Surge", "Overwhelming Force", "Pet Power",
+        "Quick Instincts", "Relentless Crits", "Shield Block",
+        "Spell Mastery", "Spirit Surge", "Stalwart", "Temporal Flux",
+        "Thick Hide", "Wellspring",
+    }
+    for _, family in ipairs(knownRanked) do
+        local suffix = " of " .. family .. " " .. rank
+        if title:sub(-#suffix):lower() == suffix:lower() then
+            return family, rank
+        end
+    end
+    if not base or base == "" or title == base then return nil end
     local name
     if title:sub(1, #base + 1) == base .. " " then
         name = title:sub(#base + 2, #title - #rank - 1)
