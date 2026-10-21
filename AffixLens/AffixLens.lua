@@ -261,6 +261,57 @@ local function readEquipment(entry)
     }
 end
 
+-- Source-item candidates from Ebonhold Weapon Affixes - Item Affix Mapping.csv.
+-- Item IDs alone are NOT proof an engraved affix exists; require tooltip
+-- evidence (@affix@ proc or an actual changed weapon suffix).
+local weaponSourceFamilies = {
+    ["Affliction"]="19910,3194,6831,2912,11121,13053,2205,19170,1387,1481,12250,1318,1982,3822,17752,2163,1482,2256,12974,28164,13051",
+    ["Azzinoth"]="10847,32471",
+    ["Bladestorm"]="7717",
+    ["Bloodlust"]="27901,28438,28439,28437,17112,18203,2243,31318,29348,9423",
+    ["Clarity"]="17733,17943,31322",
+    ["Concussion"]="11608,28441,12796,13198,13393,29182,28442,12528",
+    ["Decay"]="10803,14576,13032,8225",
+    ["Devastation"]="30090",
+    ["Dissolution"]="11635,6909",
+    ["Execution"]="12583,11744,9511,13054,2164,1986,8190,19918,17766,9478,13285,19324,13060,11603",
+    ["Ferocity"]="29962,11817",
+    ["Fire Blast"]="2825,9412",
+    ["Flame Wrath"]="11809",
+    ["Flurry"]="31332,871,11684,17705",
+    ["Fortification"]="8223,28367,18348,6622",
+    ["Frailty"]="14024,934,13401",
+    ["Frost Arrow"]="2824",
+    ["Fury"]="29996",
+    ["Glaciation"]="10761,810,10623",
+    ["Hemorrhage"]="12791,6738,13057,809,7753,12463,13399,17730,10772,5616,15814,13016,8224",
+    ["Incineration"]="14555,18671,11803,9419,6220,18816,12531,1728",
+    ["Judgement"]="754",
+    ["Julie's Blessing"]="6660",
+    ["Keeper's Sting"]="10567,6469,17753",
+    ["Maiming"]="10628,28573,9475,9425,17075",
+    ["Permafrost"]="14487,13148,7730,13984,17704,19099,5815,5182,5756",
+    ["Pyromancy"]="2299,9386,10797,12992,12243,17193,2915,12792",
+    ["Rending"]="12798,13204,11607,13286,9485",
+    ["Resurgence"]="12790,647,23541,19334",
+    ["Shackling"]="9608,7954",
+    ["Shahram"]="12592",
+    ["Speed"]="18410",
+    ["Sulfuras"]="17182",
+    ["Thunderfury"]="19019",
+    ["Twin Shot"]="34334",
+    ["Undead"]="13246",
+    ["Val'Anyr"]="46017",
+    ["Vampirism"]="19852,31193,50415,50709,12621,10804,28774,21856,28311,17074,11920",
+    ["Venom"]="6904,4446,7959,17738,13983,17002,12582,4449,1726,1265,13035,5426,6472,899,13183,15853,5752",
+    ["Vulnerability"]="19169",
+    ["Wilds"]="811,19100,9446,20578,9651,21679,11902,2263,15418,9486,8006,19901",
+}
+local weaponSourceByID = {}
+for family, ids in pairs(weaponSourceFamilies) do
+    for id in ids:gmatch("%d+") do weaponSourceByID[tonumber(id)] = family end
+end
+
 -- An affix from the weapon catalog must occur on an actual weapon.
 -- Checking suffixes on every bag item mistakes Potion of Speed for Speed.
 -- Use WoW's actual item class rather than name/substrings; ranged weapons
@@ -302,6 +353,9 @@ _G.AffixLensInspectBagItem = function(bag, slot)
     -- Require an actual changed tooltip title for an explicit suffix.
     -- Unmodified base items can still be identified by their @affix@ proc.
     local weapon=(title ~= base and weaponSuffix(title)) or (effect and resolveWeaponProc(effect))
+    -- Source mapping only supplements an actual tooltip proc. It never marks
+    -- an item based on a matching name or item ID alone.
+    if not weapon and effect then weapon=weaponSourceByID[itemID] end
     return weapon
 end
 
