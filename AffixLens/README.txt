@@ -1,25 +1,28 @@
-AffixLens v2.0.1 test build for Project Ebonhold (WoW 3.3.5a)
+AffixLens V2 3.0.0
+========================
 
-Install: extract AffixLens/ to ebonhold/Interface/AddOns/ and restart or /reload.
-Open the character window and click Affix View or Collection. Click again to close. Views switch exclusively and close with the character window.
+To open: left-click the minimap icon.
+To move icon: drag the minimap icon.
 
-Collection: /affixcollection (toggle); /affixcollection scan (refresh).
+Collection tab: every V2 affix family, the highest learned rank, and hover effect descriptions.
+Equipped tab: equipment slot, equipped item, and current affix. Hover an affix for effect tooltip; hover item name for its regular tooltip.
 
-Armor ranked affixes and weapon unranked affixes appear in separate alphabetical sections. Search filters the list. Equipment shows normalized, abbreviated affix names and warns for duplicate affix plus rank.
+V2: only highest learned rank counts as owned. Earlier ranks are superseded.
+Bag '!' markers appear only on affixes of a higher rank than the currently learned rank.
 
-Known limitations: party comparisons, peer history, bag glow, and item-tooltip learning annotations from AffixDex have not yet been ported. Weapon proc recognition and server rank catalog depend on Ebonhold runtime data.
+Commands:
+  /affixlens
+  /affixlens collection
+  /affixlens equipped
+  /affixlens refresh
+  /affixlens minimap reset
+  /affixdiscover on / off
+  /affixbagtest
 
-AffixDex by Noturpalguy was consulted for catalog integration and mapping. Attribution and MIT license: THIRD_PARTY_LICENSES.txt.
+Install: REPLACE the entire previous Interface/AddOns/AffixLens folder.
+Beta: needs an in-game test. No changes are made to affixes or equipment.
 
-Button placement: by default, Affix View and Collection appear in the character title bar.
-/affixes anchors unlock : drag either button to move the pair.
-/affixes anchors lock : finish positioning.
-/affixes anchors reset : reset to the default title bar position.
-Positions are saved per character.
+Stan, with CarolJean (ChatGPT)
 
-UI polish: Both header buttons now use identical sizes and the same movable title-bar anchor.
-
-Affix View: Use the Show labels checkbox to hide or show character-sheet affix text.
-The setting persists across sessions. /affixes inline on|off is also supported.
-
-Collection now also includes Show Equipment Labels. Both checkboxes share the same setting.
+V2 patch: ranged weapons/wands are affixable again. Their equipped affixes
+appear in the Equipped tab and are counted in the equipment summary.

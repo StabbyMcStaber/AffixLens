@@ -1,80 +1,48 @@
-# AffixLens
+# AffixLens V2 — v3.0.0
 
-**Your equipped affixes, learned ranks, and collection  -  all in one place.**
+**A minimap-driven collection and equipment viewer for Project Ebonhold V2 (WoW 3.3.5a).**
 
-![Release](https://img.shields.io/badge/release-v2.0.0-blue) ![WoW](https://img.shields.io/badge/WoW-3.3.5a-orange) ![Server](https://img.shields.io/badge/server-Project%20Ebonhold-purple)
+## What's new
 
-AffixLens is an addon for **Project Ebonhold** (World of Warcraft 3.3.5a). It shows affixes right on your character sheet, gives you a complete equipped-gear breakdown, and tracks which armor ranks and weapon affixes you have learned.
+- Single minimap button: **left-click** to open/close, **drag** to reposition around the minimap.
+- One standalone, movable, resizable window with **Collection** and **Equipped** tabs.
+- No buttons, inline labels, or other overlays on the character sheet.
+- **Collection** lists all 268 V2 affix families, searchable by name, specialization, category, and effect text; cycle category filter with the button. Each family shows its **highest currently learned rank** (I–V), or `Not learned`.
+- **Equipped** lists every equipped item and its affix. Hover the **affix column** for that rank's actual description, category, learned state, and application cost. Hover the **item column** for the normal WoW item tooltip.
+- Detects equipped affixes via the item's V2 **enchant ID**, then verifies via the actual item tooltip suffix if needed. Never assumes an affix exists because of an item ID alone.
+- The **V2 rank upgrade rule** is honored: learning III replaces II, and the bag ! indicator shows **only** a rank greater than your current highest known rank. Existing lower ranks do **not** count as owned or as upgrades.
+- Duplicate-family warning, because descriptions say effects do not stack.
+- Includes the full V2 catalog captured November 16, 2026 as an **offline metadata-only fallback**. A live Ebonhold catalog takes precedence. This file **never** supplies learned ownership: learned state always comes from the current server connection.
+- No requirement for AffixDex or any other library.
 
-**[Download AffixLens](https://github.com/StabbyMcStaber/AffixLens/releases/latest)** · **[Report a problem](https://github.com/StabbyMcStaber/AffixLens/issues)**
+## Install
 
-## Screenshots
-
-### Your gear, at a glance
-
-Affix names sit beside your equipment slots  -  including the main-hand and ranged weapon affixes. Long names use readable abbreviations rather than losing the important part to `...`.
-
-![AffixLens equipment labels in the character window](docs/screenshots/AffixLens_1.png)
-
-### Collection: armor ranks and weapon affixes
-
-Browse two alphabetical groups: **Armor** (available Roman-numeral ranks, learned or missing) and **Weapon** (learned or not learned). Filter by name with the search field. The list uses the Ebonhold runtime catalog where available, so affixes don't all have to share the same maximum rank.
-
-![AffixLens collection tracker](docs/screenshots/AffixLens_2.png)
-
-### Detailed equipment overview
-
-Open a movable overview listing every equipped item and its current affix. Hover an entry to inspect its equipment tooltip.
-
-![AffixLens equipped affixes overview](docs/screenshots/AffixLens_3.png)
-
-## Features
-
-- **Inline equipment labels:** Read each equipped item's affix in your character window. Supports armor, rings, trinkets, main-hand, off-hand, and ranged equipment. Shows `N/A` when no affix is detected.
-- **Detailed Affix View:** Inspect slot, item, and affix together in a separate movable window.
-- **Accurate duplicate checks:** `Keen Strikes V` and `Keen Strikes VI` are *different* ranks, not duplicates. Only identical ranked affixes are flagged; unranked weapon-only affixes are exempt.
-- **Collection tracker:** Separate alphabetical armor/weapon sections, learned state, real available ranks, and search.
-- **Weapon recognition:** Identifies named weapon affixes such as **Vulnerability** and **Venom**, not just their proc descriptions.
-- **Cleaner labels:** Removes the leading `of`, handles escaped apostrophes, and abbreviates long names meaningfully.
-- **Simple window controls:** **Affix View** and **Collection** buttons appear on the character sheet. Clicking the active view closes it; switching views closes the previous one; closing your character window closes both.
-- **Ebonhold-aware:** Reads the server-provided affix catalog when available, with fallback information for startup.
-
-## Installation
-
-1. Download the latest **AffixLens** ZIP from [Releases](https://github.com/StabbyMcStaber/AffixLens/releases/latest).
-2. Extract it and place the **`AffixLens`** folder in:
-
-   ```text
-   ebonhold\Interface\AddOns\AffixLens\
-   ```
-
-3. Start the WoW 3.3.5a client. For an update to an existing addon, `/reload` is generally sufficient; a first install may require restarting the game.
-4. Open your character window with **C**, then choose **Affix View** or **Collection**.
+1. **Delete** the previous `Interface/AddOns/AffixLens` folder so old `.toc` files and legacy UI code aren't accidentally reused.
+2. Unzip this release into `Interface/AddOns/` so the file exists at `Interface/AddOns/AffixLens/AffixLens.toc`.
+3. Restart your WoW 3.3.5a client, or run `/reload` if this was an update of an already-loaded addon.
+4. Click the small purple minimap button to open or close AffixLens.
 
 ## Commands
 
-| Command | Action |
+| Command | Purpose |
 |---|---|
-| `/affixes` | Equipment view / available equipment commands |
-| `/affixcollection` | Toggle Collection |
-| `/affixcollection scan` | Refresh your learned collection |
+| `/affixlens` or `/affixes` | Toggle window |
+| `/affixlens collection` | Open Collection tab |
+| `/affixlens equipped` | Open Equipped tab |
+| `/affixlens refresh` | Refresh live learned status and item catalog |
+| `/affixlens minimap reset` | Reset minimap button position |
+| `/affixdiscover on/off` | Control bag upgrade chat/sound alerts (bag ! markers always remain) |
+| `/affixbagtest` | Report upgrade items in bags for diagnostics |
 
-## Compatibility and scope
+## Compatibility & limitations
 
-- **Game:** World of Warcraft 3.3.5a (Wrath of the Lich King)
-- **Server:** Project Ebonhold
-- **Standalone:** Does **not** require AffixDex to be installed
-
-Version 2.0.0 includes **local** collection tracking. Features from AffixDex such as party comparisons, historical player snapshots, bag highlighting, and expanded learned-state tooltip annotations are **not included** in this release.
+- V2 slots and allowed categories are based on a live player's verified Anvil behavior. Shirt and tabard remain non-affixable. Ranged/wand is now affixable according to live player verification. The server has not yet supplied verified category restrictions for ranged weapons, so AffixLens displays the applied affix without falsely warning of a category conflict.
+- The catalog lists *all classes' affixes*; class and specialization requirements appear in tooltips where available.
+- The live learned table must arrive from the server. Until then the UI says `Syncing...`, not a possibly wrong saved rank.
+- The offline catalog is a snapshot and may not include affixes introduced in a later patch, but newly introduced live affixes are merged dynamically.
+- Bag markers use the normal bag slot tooltips; custom bag addons may use button layouts that aren't detected.
+- The Collection/Equipped tabs, hover tooltips, live 268-family catalog, and 17/17 slots (including an affixed wand) were verified in-game on November 17, 2026.
 
 ## Credits
 
-Created by **Stan**, with development assistance from **CarolJean (ChatGPT)**.
-
-Thanks to **Noturpalguy**, author of [AffixDex](https://github.com/kwilliams312/AffixDex), whose Ebonhold catalog and detection work informed this addon. Original MIT copyright and license notices are preserved in [THIRD_PARTY_LICENSES.txt](AffixLens/THIRD_PARTY_LICENSES.txt). AffixDex remains the original author's work.
-
-## Feedback
-
-Found something wrong or have an idea? [Open an issue](https://github.com/StabbyMcStaber/AffixLens/issues) with the item name, expected affix, and a screenshot if possible.
-
-**Happy farming!**
+Stan, with CarolJean (ChatGPT). The original AffixLens project also credits Noturpalguy for AffixDex inspiration. This V2 rewrite does not bundle AffixDex code.

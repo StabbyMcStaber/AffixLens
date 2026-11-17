@@ -1,12 +1,12 @@
 ## Interface: 30300
-## Title: AffixLens
-## Notes: Shows equipped Ebonhold affixes on the character sheet and in an optional movable window.
+## Title: AffixLens |cffb794faV2|r
+## Notes: V2 affix collection and equipped viewer, accessed from a minimap icon.
 ## Author: Stan (with CarolJean)
-## Version: 2.1.3
+## Version: 3.0.0
 ## SavedVariables: AffixLensDB
 ## SavedVariablesPerCharacter: AffixLensCharDB
 
+V2Fallback.lua
 AffixLens.lua
-Collection.lua
+UI.lua
 Discovery.lua
-DiscoveryCompat.lua
