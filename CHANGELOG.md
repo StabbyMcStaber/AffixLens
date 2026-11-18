@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.1 — November 17, 2026
+
+- Added verified V2 Collection and Equipped screenshots to the public README, including 17/17 slot detection with wand engraving.
+- Updated current project attribution and bundled the retained third-party MIT license in the installer.
+- No V2 gameplay or scanning logic changes.
+
 ## 3.0.0 — November 17, 2026
 
 - Release-ready Ebonhold V2 rewrite after successful player testing.

@@ -1,9 +1,9 @@
--- AffixLens 3.0.0 — Project Ebonhold V2 / WoW 3.3.5a (Lua 5.1)
--- Author: Stan, with CarolJean
+-- AffixLens 3.0.1 — Project Ebonhold V2 / WoW 3.3.5a (Lua 5.1)
+-- Author: Stan
 -- Neither character-sheet buttons nor character-sheet overlays are created.
 AffixLens = AffixLens or {}
 local A = AffixLens
-A.version = "3.0.0"
+A.version = "3.0.1"
 A.roman = {"I", "II", "III", "IV", "V"}
 A.categories = {"Offensive", "Defensive", "Resource", "Utility", "Mobility"}
 A.prefix = "|cffc28cffAffixLens|r: "

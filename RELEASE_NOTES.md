@@ -1,6 +1,20 @@
-# AffixLens v3.0.0 — Ebonhold V2 Release
+# AffixLens v3.0.1 — Ebonhold V2 Release
 
 Full rewrite for **Project Ebonhold V2**, verified in-game on November 17, 2026.
+
+## v3.0.1 updates
+
+- Added the in-game Collection and Equipped screenshots to the [GitHub README](https://github.com/StabbyMcStaber/AffixLens#in-game-screenshots).
+- Cleaned current project credits; preserved the original third-party MIT attribution.
+- No changes to equipped-affix behavior since v3.0.0.
+
+## Screenshots
+
+**Collection (268 families):**
+![Collection](https://raw.githubusercontent.com/StabbyMcStaber/AffixLens/main/docs/screenshots/collection-v2.png)
+
+**Equipped (17/17, including wand):**
+![Equipped](https://raw.githubusercontent.com/StabbyMcStaber/AffixLens/main/docs/screenshots/equipped-v2.png)
 
 ## Highlights
 
@@ -13,7 +27,7 @@ Full rewrite for **Project Ebonhold V2**, verified in-game on November 17, 2026.
 
 ## Installation
 
-Delete an old `Interface/AddOns/AffixLens` folder, then extract `AffixLens-v3.0.0.zip` into `Interface/AddOns/`. The installed file must be at `Interface/AddOns/AffixLens/AffixLens.toc`. Restart WoW or `/reload`.
+Delete an old `Interface/AddOns/AffixLens` folder, then extract `AffixLens-v3.0.1.zip` into `Interface/AddOns/`. The installed file must be at `Interface/AddOns/AffixLens/AffixLens.toc`. Restart WoW or `/reload`.
 
 ## Note
 

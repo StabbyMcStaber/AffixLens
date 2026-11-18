@@ -1,6 +1,18 @@
-# AffixLens V2 — v3.0.0
+# AffixLens V2 — v3.0.1
 
 **A minimap-driven collection and equipment viewer for Project Ebonhold V2 (WoW 3.3.5a).**
+
+## In-game screenshots
+
+### Collection — browse all 268 V2 affix families
+
+![AffixLens V2 Collection tab showing affix families, categories, and learned Rank V status](docs/screenshots/collection-v2.png)
+
+### Equipped — every item, affix, and rank (including wands)
+
+![AffixLens V2 Equipped tab showing 17 of 17 affixable equipment slots, including a wand with Hemorrhage V](docs/screenshots/equipped-v2.png)
+
+*Screenshots were captured during v3.0.0 beta testing. The same interface is included in v3.0.1.*
 
 ## What's new
 
@@ -45,4 +57,4 @@
 
 ## Credits
 
-Stan, with CarolJean (ChatGPT). The original AffixLens project also credits Noturpalguy for AffixDex inspiration. This V2 rewrite does not bundle AffixDex code.
+Created and maintained by **Stan**. AffixDex by **Noturpalguy** inspired the original catalog and detection approach; its MIT attribution is preserved in [`THIRD_PARTY_LICENSES.txt`](AffixLens/THIRD_PARTY_LICENSES.txt).

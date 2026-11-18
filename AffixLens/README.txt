@@ -1,4 +1,4 @@
-AffixLens V2 3.0.0
+AffixLens V2 3.0.1
 ========================
 
 To open: left-click the minimap icon.
@@ -20,9 +20,9 @@ Commands:
   /affixbagtest
 
 Install: REPLACE the entire previous Interface/AddOns/AffixLens folder.
-Beta: needs an in-game test. No changes are made to affixes or equipment.
+Verified in-game on Project Ebonhold V2. The addon does not modify affixes or equipment.
 
-Stan, with CarolJean (ChatGPT)
+Created and maintained by Stan.
 
 V2 patch: ranged weapons/wands are affixable again. Their equipped affixes
 appear in the Equipped tab and are counted in the equipment summary.

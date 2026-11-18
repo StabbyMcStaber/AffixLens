@@ -1,8 +1,8 @@
 ## Interface: 30300
 ## Title: AffixLens |cffb794faV2|r
 ## Notes: V2 affix collection and equipped viewer, accessed from a minimap icon.
-## Author: Stan (with CarolJean)
-## Version: 3.0.0
+## Author: Stan
+## Version: 3.0.1
 ## SavedVariables: AffixLensDB
 ## SavedVariablesPerCharacter: AffixLensCharDB
 

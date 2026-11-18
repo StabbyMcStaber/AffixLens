@@ -1,4 +1,4 @@
-# AffixLens 3.0.0-beta.2 smoke test
+# AffixLens 3.0.1 validation notes
 
 1. Delete the existing AffixLens addon folder, install the new folder, restart or reload; ensure **zero** old character sheet labels/buttons.
 2. Verify minimap icon: hover text, click toggles, dragging changes position; `/affixlens minimap reset` restores default.
